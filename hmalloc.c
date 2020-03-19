@@ -96,7 +96,8 @@ insertFree(hm_list* node) {
 	//if there is nothing in the list just put the node right there
 	if (free_alist == 0) {
 		free_alist = node;
-		//printf("list was empty\n"); 
+		//printf("list was empty\n");
+		//printf("GOT TO A\n");  
 	        return; 	
 	}
 	
@@ -126,14 +127,14 @@ insertFree(hm_list* node) {
 				//make it all part of the prev block
 				prev->size = prev_size + node_size + curr->size; 
 				prev->next = curr->next; 
-				printf("got to coalesce both\n"); 
+				//printf("got to coalesce both\n"); 
 			}
 			//coalesce prev and insert
 			else if (prev_address == insert_addr_start) {
 				//make both part of prev block
 				prev->size = prev_size + node_size;
 				prev->next = curr; 
-				printf("got to prev\n"); 
+				//printf("got to prev\n"); 
 			}
 			//coalesce insert and next 
 			else if (insert_addr_end == next_address) {
@@ -143,7 +144,7 @@ insertFree(hm_list* node) {
 					prev->next = node; 
 				}
 				node->next = curr->next; 
-				printf("got to next\n"); 
+				//printf("got to next\n"); 
 			}
 					
 			//no coalesce
@@ -152,7 +153,7 @@ insertFree(hm_list* node) {
 					prev->next = node;
 				}
 				node->next = curr;
-			        printf("no coalesce\n"); 	
+			        //printf("no coalesce\n"); 	
 			}
 
 		        //want to break out of loop
@@ -174,7 +175,7 @@ void*
 hmalloc(size_t size)
 {
 
-    printf("User is requesting %d\n", (int) size); 
+    //printf("User is requesting %d\n", (int) size); 
  
     stats.chunks_allocated += 1;
     size += sizeof(size_t);
@@ -184,16 +185,18 @@ hmalloc(size_t size)
     hm_list* curr = free_alist; //this is the head of the list
     hm_list* prev = 0; 
     if (size < PAGE_SIZE) {
-    for (; free_alist; free_alist = free_alist->next) {
+    while (curr != 0) {
 	    if (free_alist->size >= size) {
 		    block = free_alist; 
 		    //if it's at the head set prev next to curr next
 		    //otherwise just set the head of list
 		    if (prev != 0) {
 			   prev->next = curr->next;
+			   //printf("WE GET TO CONDITION A\n"); 
 		    }
 		    else {
 			   free_alist = curr->next;
+			   //printf("WE GET TO CONDITION B\n");
 		    }
 		    //this returns when we have enough space in the free list
 		    //check if leftover has room to hold node
@@ -205,15 +208,18 @@ hmalloc(size_t size)
 			   extra_block->size = block->size - size - sizeof(size_t);
 			   extra_block->next = 0;
 
-			   printf("print list before insertion is 2 ");
-			   printList(free_alist);
+			   //printf("print list before insertion is 2 ");
+			   //printList(free_alist);
 			   insertFree(extra_block);
-			   printf("print list after insertion is 2 "); 
-			   printList(free_alist);  
+			   //printf("print list after insertion is 2 "); 
+			   //printList(free_alist);  
+
+			   //printf("WE GET TO CONDITION C\n"); 
 
 			   //block is now just the size
 			   block->size = size; 
 		    } 
+		    //printf("WE GET TO CONDITION D\n"); 
 		    return (void*) block + sizeof(size_t);
 	    }
 
@@ -236,22 +242,26 @@ hmalloc(size_t size)
 	    extra_block->size = block->size - size - sizeof(size_t);
 	    extra_block->next = 0;  
 
-	    printf("free list before insertion is 1 ");
-	    printList(free_alist); 
+	    //printf("free list before insertion is 1 ");
+	    //printList(free_alist); 
 	    insertFree(extra_block); 
-	    printf("free list after insertion is 1 ");
-	    printList(free_alist); 
+	    //printf("free list after insertion is 1 ");
+	    //printList(free_alist); 
+
+	    //printf("WE GET TO CONDITION E\n"); 
 	    
 	    //block size is now just the size
 	    block->size = size; 
     }
 
     // return pointer after size field
+    //printf("WE GET TO CONDITION F\n"); 
     return (void*) block + sizeof(size_t);
 
     }
 
     else {
+	    //printf("WE GET TO CONDITION G\n"); 
 	    int numPages = (size + PAGE_SIZE - 1) / PAGE_SIZE; 
 	    stats.pages_mapped += numPages;
 	    size_t bigSize = PAGE_SIZE * numPages;
@@ -273,11 +283,11 @@ hfree(void* item)
 
     if (node->size < PAGE_SIZE) {
 
-	    printf("The free list before insertion is 3 ");
-	    printList(free_alist); 
+	    //printf("The free list before insertion is 3 ");
+	    //printList(free_alist); 
 	    insertFree(node);  
-	    printf("The free list after insertion is 3 ");
-	    printList(free_alist); 
+	    //printf("The free list after insertion is 3 ");
+	    //printList(free_alist); 
     }
 
     if (node->size >= PAGE_SIZE) {
