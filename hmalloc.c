@@ -81,6 +81,7 @@ div_up(size_t xx, size_t yy)
 
 void
 printList(hm_list* list) {
+	printf("HAVA "); 
 	int i = 0;
 	for (; list; list = list->next) {
 		int list_size = (int) list->size;
@@ -101,7 +102,7 @@ insertFree(hm_list* node) {
 	
 	//otherwise we have to loop through to see where it goes
 	//this is the insert
-	/*hm_list* curr = free_alist; //the head of list
+	hm_list* curr = free_alist; //the head of list
 	hm_list* prev = 0; 
 	while (curr != 0) {
 		//if the current address is greater than the given address it has to be the previous one, replace previous
@@ -165,13 +166,15 @@ insertFree(hm_list* node) {
 		prev = curr; 
 		curr = curr->next;
 
-	}*/
+	}
 
 }
 
 void*
 hmalloc(size_t size)
 {
+
+    printf("User is requesting %d\n", (int) size); 
  
     stats.chunks_allocated += 1;
     size += sizeof(size_t);
@@ -180,7 +183,7 @@ hmalloc(size_t size)
     hm_list* block = 0;
     hm_list* curr = free_alist; //this is the head of the list
     hm_list* prev = 0; 
-    if (size <= PAGE_SIZE) {
+    if (size < PAGE_SIZE) {
     for (; free_alist; free_alist = free_alist->next) {
 	    if (free_alist->size >= size) {
 		    block = free_alist; 
@@ -199,14 +202,14 @@ hmalloc(size_t size)
 			   //get address
 			   void* extra = (void*) block + size; 
 			   hm_list* extra_block = (hm_list*) extra; 
-			   extra_block->size = block->size - size;
+			   extra_block->size = block->size - size - sizeof(size_t);
 			   extra_block->next = 0;
 
-			   //printf("print list before insertion is ");
-			   //printList(free_alist);
+			   printf("print list before insertion is 2 ");
+			   printList(free_alist);
 			   insertFree(extra_block);
-			   //printf("print list after insertion is "); 
-			   //printList(free_alist);  
+			   printf("print list after insertion is 2 "); 
+			   printList(free_alist);  
 
 			   //block is now just the size
 			   block->size = size; 
@@ -230,14 +233,14 @@ hmalloc(size_t size)
 	    void* extra = (void*) block + size;
 	    //create node at that address
 	    hm_list* extra_block = (hm_list*) extra;
-	    extra_block->size = block->size - size;
+	    extra_block->size = block->size - size - sizeof(size_t);
 	    extra_block->next = 0;  
 
-	    //printf("free list before insertion is ");
-	    //printList(free_alist); 
+	    printf("free list before insertion is 1 ");
+	    printList(free_alist); 
 	    insertFree(extra_block); 
-	    //printf("free list after insertion is ");
-	    //printList(free_alist); 
+	    printf("free list after insertion is 1 ");
+	    printList(free_alist); 
 	    
 	    //block size is now just the size
 	    block->size = size; 
@@ -270,11 +273,11 @@ hfree(void* item)
 
     if (node->size < PAGE_SIZE) {
 
-	    //printf("The free list before insertion is ");
-	    //printList(free_alist); 
+	    printf("The free list before insertion is 3 ");
+	    printList(free_alist); 
 	    insertFree(node);  
-	    //printf("The free list after insertion is ");
-	    //printList(free_alist); 
+	    printf("The free list after insertion is 3 ");
+	    printList(free_alist); 
     }
 
     if (node->size >= PAGE_SIZE) {
